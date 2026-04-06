@@ -948,3 +948,39 @@ on em.codigo_empleado = cl.codigo_empleado_rep_ventas
 where upper(cl.ciudad)= 'MADRID'
 and em.codigo = 30
 or em.codigo = 11;
+
+SELECT SUM(TABLA2.TOTAL_REGISTROS) SUMA_REGISTROS,
+       GROUP_CONCAT(TABLA2.CIUDAD ORDER BY TABLA2.CIUDAD SEPARATOR ',') LISTA_CIUDAD
+FROM (
+    select tabla.ciudad,
+           CAST(tabla.total_registros AS SIGNED) TOTAL_REGISTROS
+    from (
+        select cl.ciudad, count(*) total_registros
+        /* cl.ciudad, cm.codigo_empleado */
+        from cliente cl, empleado cm
+        where cm.codigo_empleado = cl.codigo_empleado_rep_ventas
+        and cm.codigo_empleado in (11,30)
+        group by cl.ciudad
+    ) tabla
+    
+    union
+    select ('Barcelona') ciudad, (10) total_registros from dual
+) TABLA2;
+SELECT SUM(TABLA2.TOTAL_REGISTROS) SUMA_REGISTRADOS,
+       group_concat(TABLA2.CIUDAD order by TABLA2.CIUDAD separator ',') LISTA_CIUDAD
+FROM (SELECT tabla.ciudad, CAST(tabla.total_registros AS SIGNED) TOTAL_REGISTROS
+      FROM (select cl.ciudad , count(*) total_registros
+            from cliente cl, empleado em
+            where em.codigo_empleado = cl.codigo_empleado_rep_ventas
+              and em.codigo_empleado in (11,30)
+            group by cl.ciudad) tabla
+      union
+      select ('Barcelona') ciudad, (10) total_registros from dual) TABLA2;
+
+select cl.ciudad , count(*) total_registros,
+       LPAD(COUNT(*),8,'0') total_registros,
+       rpad(count(*),8,'0') total_registros
+from Cliente cl, empleado em
+where em.codigo_empleado = cl.codigo_empleado_rep_ventas
+  and em.codigo_empleado in (11,30)
+group by cl.ciudad;
